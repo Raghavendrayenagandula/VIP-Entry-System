@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Gate QR Scanner{% endblock %}
+
+{% block extra_head %}
+<!-- HTML5 QR Code Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card" style="text-align: center;">
+        <h2>Gate Access Control</h2>
+        
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="font-weight: bold;">Checkpoint Action Mode:</label>
+            <select id="action-mode" style="font-size: 1.1rem; text-align: center;">
+                <option value="ENTRY">ENTRY POINT (Check-In)</option>
+                <option value="EXIT">EXIT POINT (Check-Out)</option>
+            </select>
+        </div>
+
+        <div id="reader" style="width: 100%; border-radius: 8px; overflow: hidden;"></div>
+
+        <div id="scan-result" class="card" style="display: none; margin-top: 1rem; border-left: 5px solid gray;">
+            <h3 id="result-status">Processing...</h3>
+            <p id="result-message"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const html5QrCode = new Html5Qrcode("reader");
+    let isScanningAllowed = true;
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (!isScanningAllowed) return;
+        
+        isScanningAllowed = false;
+        const action = document.getElementById('action-mode').value;
+        const resultDiv = document.getElementById('scan-result');
+        const statusHeader = document.getElementById('result-status');
+        const messagePara = document.getElementById('result-message');
+
+        resultDiv.style.display = 'block';
+        statusHeader.innerText = "Verifying Pass...";
+        statusHeader.style.color = "orange";
+        messagePara.innerText = `Scanned ID: ${decodedText}`;
+
+        fetch("{% url 'process_scan' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                pass_id: decodedText,
+                action: action
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resultDiv.style.borderLeftColor = "var(--success)";
+                statusHeader.style.color = "var(--success)";
+                statusHeader.innerText = `SUCCESS: ${action} GRANTED`;
+                messagePara.innerText = `${data.visitor.name} (${data.visitor.organization})`;
+            } else {
+                resultDiv.style.borderLeftColor = "var(--danger)";
+                statusHeader.style.color = "var(--danger)";
+                statusHeader.innerText = "ACCESS DENIED";
+                messagePara.innerText = data.message;
+            }
+        })
+        .catch(err => {
+            resultDiv.style.borderLeftColor = "var(--danger)";
+            statusHeader.style.color = "var(--danger)";
+            statusHeader.innerText = "SYSTEM ERROR";
+            messagePara.innerText = "Failed to communicate with server.";
+        })
+        .finally(() => {
+            setTimeout(() => {
+                isScanningAllowed = true;
+            }, 3000); // 3-second cooldown between scans
+        });
+    }
+
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    
+    // Supports camera feed and file upload drop-in via library default UI components if needed
+    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+    .catch(err => {
+        console.error("Camera access failed:", err);
+    });
+</script>
+{% endblock %}

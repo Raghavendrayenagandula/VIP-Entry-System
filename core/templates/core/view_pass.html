@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+
+{% block title %}VIP Pass - {{ visitor.full_name }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 1rem;">
+    <button onclick="window.print()" class="btn">Print Pass</button>
+</div>
+
+<div class="pass-card">
+    <div style="text-transform: uppercase; letter-spacing: 2px; font-weight: bold; color: var(--accent);">VIP Access Pass</div>
+    <h2 style="margin: 0.5rem 0;">{{ visitor.full_name }}</h2>
+    <p style="margin: 0; color: #64748b;">{{ visitor.designation }}</p>
+    <p style="margin: 0 0 1rem 0; font-weight: 500;">{{ visitor.organization }}</p>
+    
+    {% if visitor.qr_code %}
+        <img src="{{ visitor.qr_code.url }}" alt="VIP QR Code">
+    {% endif %}
+    
+    <p><span class="badge badge-{{ visitor.status }}">{{ visitor.get_status_display }}</span></p>
+    <small style="color: #94a3b8; display: block; word-break: break-all;">ID: {{ visitor.pass_id }}</small>
+</div>
+{% endblock %}

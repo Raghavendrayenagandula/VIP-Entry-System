@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Register VIP{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2>Register New VIP Visitor</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" name="full_name" required>
+            </div>
+            <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number *</label>
+                <input type="text" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label>Organization / Company</label>
+                <input type="text" name="organization">
+            </div>
+            <div class="form-group">
+                <label>Designation</label>
+                <input type="text" name="designation">
+            </div>
+            <button type="submit" class="btn btn-accent" style="width: 100%;">Generate VIP Pass</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2>System Overview</h2>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Passes</h3>
+        <div class="number">{{ stats.total }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Expected</h3>
+        <div class="number">{{ stats.expected }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Currently Inside</h3>
+        <div class="number" style="color: var(--success);">{{ stats.entered }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Exited</h3>
+        <div class="number" style="color: var(--danger);">{{ stats.exited }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>VIP Visitor List</h3>
+        <a href="{% url 'add_visitor' %}" class="btn btn-accent">+ Register VIP</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Organization</th>
+                <th>Status</th>
+                <th>Pass ID</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in visitors %}
+            <tr>
+                <td><strong>{{ v.full_name }}</strong><br><small>{{ v.designation }}</small></td>
+                <td>{{ v.organization|default:"--" }}</td>
+                <td><span class="badge badge-{{ v.status }}">{{ v.get_status_display }}</span></td>
+                <td><code>{{ v.pass_id|stringformat:".8s" }}...</code></td>
+                <td><a href="{% url 'view_pass' v.pass_id %}" class="btn">View Pass</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center;">No visitors registered yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
