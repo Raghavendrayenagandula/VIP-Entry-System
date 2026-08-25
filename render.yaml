@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: vip-entry-system
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn vip_system.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "vip-entry-system.onrender.com"
